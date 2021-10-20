@@ -1,0 +1,4 @@
+<%= render 'shared/attributes/code', attribute: :stripe_customer_id %>
+<%= render 'shared/attributes/code', attribute: :stripe_subscription_id %>
+<%= button_to "Complete Purchase", [:checkout, :account, subscription.provider_subscription], method: :post, data: {turbo: 'false'} %>
+<%= button_to "View Portal", [:portal, :account, subscription.provider_subscription], method: :post, data: {turbo: 'false'} %>
