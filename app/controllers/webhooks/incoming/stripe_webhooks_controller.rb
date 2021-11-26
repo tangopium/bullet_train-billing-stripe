@@ -8,7 +8,7 @@ class Webhooks::Incoming::StripeWebhooksController < Webhooks::Incoming::Webhook
     Stripe::Webhook.construct_event(
       payload,
       request.env["HTTP_STRIPE_SIGNATURE"],
-      ENV["STRIPE_WEBHOOKS_ACCOUNTS_ENDPOINT_SECRET"]
+      ENV["STRIPE_WEBHOOKS_ENDPOINT_SECRET"]
     )
 
     Webhooks::Incoming::StripeWebhook.create(
