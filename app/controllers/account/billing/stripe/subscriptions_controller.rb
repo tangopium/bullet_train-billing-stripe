@@ -10,7 +10,7 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
       customer: @team.stripe_customer_id,
       client_reference_id: @subscription.id,
       success_url: CGI.unescape(url_for([:refresh, :account, @subscription, session_id: "{CHECKOUT_SESSION_ID}"])),
-      cancel_url: url_for([:account, @subscription.generic_subscription]),
+      cancel_url: url_for([:account, @subscription.generic_subscription])
     }
 
     unless @team.stripe_customer_id
@@ -27,7 +27,7 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
   def portal
     session = Stripe::BillingPortal::Session.create({
       customer: @team.stripe_customer_id,
-      return_url: url_for([:account, @subscription.generic_subscription]),
+      return_url: url_for([:account, @subscription.generic_subscription])
     })
 
     redirect_to session.url

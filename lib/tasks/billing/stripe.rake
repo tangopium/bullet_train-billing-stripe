@@ -50,7 +50,7 @@ namespace :billing do
               product: stripe_product.id,
               unit_amount: price.amount,
               currency: price.currency,
-              recurring: {interval: price.interval},
+              recurring: {interval: price.interval}
             })
             puts "Created `#{price.id}` as a `#{price.interval}` price for `#{stripe_product.id}`.".green
           end

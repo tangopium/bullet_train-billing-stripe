@@ -6,7 +6,7 @@ class Billing::Stripe::Subscription < ApplicationRecord
     generic_subscription.included_prices.map do |included_price|
       {
         plan: Billing::Stripe::PriceAdapter.new(included_price.price).stripe_price_id,
-        quantity: included_price.quantity,
+        quantity: included_price.quantity
       }
     end
   end
