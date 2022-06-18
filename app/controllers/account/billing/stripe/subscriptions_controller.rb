@@ -19,7 +19,7 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
 
     session = Stripe::Checkout::Session.create(session_attributes)
 
-    redirect_to session.url
+    redirect_to session.url, allow_other_host: true
   end
 
   # POST /account/billing/stripe/subscriptions/:id/portal
@@ -30,7 +30,7 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
       return_url: url_for([:account, @subscription.generic_subscription])
     })
 
-    redirect_to session.url
+    redirect_to session.url, allow_other_host: true
   end
 
   # GET /account/billing/stripe/subscriptions/:id/refresh

@@ -8,3 +8,7 @@ module BulletTrain
     end
   end
 end
+
+def stripe_billing_enabled?
+  ENV["STRIPE_SECRET_KEY"].present?
+end
