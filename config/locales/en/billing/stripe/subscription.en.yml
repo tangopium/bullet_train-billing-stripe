@@ -5,6 +5,8 @@ en:
         _: &stripe_subscription_id Stripe Subscription ID
         label: *stripe_subscription_id
         heading: *stripe_subscription_id
+    notifications:
+      refreshed: Subscription was successfully updated!
   account:
     billing:
       stripe:

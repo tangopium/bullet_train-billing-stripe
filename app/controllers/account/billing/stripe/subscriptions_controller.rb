@@ -4,9 +4,11 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
   # GET/POST /account/billing/stripe/subscriptions/:id/checkout
   # GET/POST /account/billing/stripe/subscriptions/:id/checkout.json
   def checkout
+    trial_days = @subscription.generic_subscription.included_prices.map { |ip| ip.price.trial_days }.compact.max
+
     session_attributes = {
       payment_method_types: ["card"],
-      subscription_data: {items: @subscription.stripe_items},
+      subscription_data: {items: @subscription.stripe_items}.merge(trial_days ? {trial_period_days: trial_days} : {}),
       customer: @team.stripe_customer_id,
       client_reference_id: @subscription.id,
       success_url: CGI.unescape(url_for([:refresh, :account, @subscription, session_id: "{CHECKOUT_SESSION_ID}"])),
@@ -40,6 +42,6 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
     checkout_session = Stripe::Checkout::Session.retrieve(params[:session_id])
     @subscription.refresh_from_checkout_session(checkout_session)
 
-    redirect_to [:account, @subscription.generic_subscription.team]
+    redirect_to [:account, @subscription.generic_subscription.team], notice: t("billing/stripe/subscriptions.notifications.refreshed")
   end
 end

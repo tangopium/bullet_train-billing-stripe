@@ -42,7 +42,9 @@ namespace :billing do
           # check whether an appropriate price for this product already exists on stripe.
           stripe_prices = Stripe::Price.list(product: stripe_product.id).data
 
-          if (stripe_price = stripe_prices.detect { |stripe_price| price.matches_stripe_price?(stripe_price) })
+          price_adapter = Billing::Stripe::PriceAdapter.new(price)
+
+          if (stripe_price = stripe_prices.detect { |stripe_price| price_adapter.matches_stripe_price?(stripe_price) })
             puts "Verified a price similar to the `#{price.id}` price exists for `#{stripe_product.id}`.".yellow
           else
             # if this product doesn't already haves a price at the appropriate interval, create it.
@@ -55,7 +57,7 @@ namespace :billing do
             puts "Created `#{price.id}` as a `#{price.interval}` price for `#{stripe_product.id}`.".green
           end
 
-          results[Billing::Stripe::PriceAdapter.new(price).env_key] = stripe_price.id
+          results[price_adapter.env_key] = stripe_price.id
         end
       end
 
