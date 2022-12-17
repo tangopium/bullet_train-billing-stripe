@@ -38,6 +38,8 @@ class Webhooks::Incoming::StripeWebhook < ApplicationRecord
 
       # Inspect the subscriptions items on this subscription and ensure they're in-sync with our local entries.
       topic.update_included_prices(object.dig("items", "data"))
+    when "customer.subscription.deleted"
+      topic.generic_subscription.update(status: "canceled")
     end
   end
 
