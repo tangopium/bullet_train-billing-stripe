@@ -3,6 +3,12 @@ class Webhooks::Incoming::StripeWebhook < ApplicationRecord
 
   def process
     case type
+    when "checkout.session.completed"
+      # We may not know the stripe_subscription_id of the Subscription in question, so set it now.
+      # While it is often set by the user navigating to subscriptions#refresh following a completed
+      # Stripe Checkout Session, sometimes the user fails to navigate there.
+      subscription = Billing::Stripe::Subscription.find_by(id: data.dig("data", "object", "client_reference_id"))
+      subscription.update(stripe_subscription_id: data.dig("data", "object", "subscription"))
     when "customer.subscription.created", "customer.subscription.updated"
       # If the subscription is scheduled to cancel remotely, then mark it as canceling locally.
       if object.dig("cancel_at_period_end")
