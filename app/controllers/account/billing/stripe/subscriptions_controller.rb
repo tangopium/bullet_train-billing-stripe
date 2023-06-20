@@ -5,6 +5,7 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
   # GET/POST /account/billing/stripe/subscriptions/:id/checkout.json
   def checkout
     trial_days = @subscription.generic_subscription.included_prices.map { |ip| ip.price.trial_days }.compact.max
+    allow_promotion_codes = @subscription.generic_subscription.included_prices.map { |ip| ip.price.allow_promotion_codes }.compact.any?
 
     session_attributes = {
       payment_method_types: ["card"],
@@ -12,7 +13,8 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
       customer: @team.stripe_customer_id,
       client_reference_id: @subscription.id,
       success_url: CGI.unescape(url_for([:refresh, :account, @subscription, session_id: "{CHECKOUT_SESSION_ID}"])),
-      cancel_url: url_for([:account, @subscription.generic_subscription])
+      cancel_url: url_for([:account, @subscription.generic_subscription]),
+      allow_promotion_codes: allow_promotion_codes,
     }
 
     unless @team.stripe_customer_id
