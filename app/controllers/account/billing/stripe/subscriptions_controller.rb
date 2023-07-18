@@ -18,10 +18,10 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
     unless @team.stripe_customer_id
       session_attributes[:customer_email] = current_membership.email
     end
-    
+
     # Stripe requires that Checkout Sessions having different attributes must
     # have different idempotency keys, so include the updated_at in the key.
-    idempotency_key = "#{t('application.name')}:subscription:#{@subscription.id}:#{@subscription.updated_at.to_i}"
+    idempotency_key = "#{t("application.name")}:subscription:#{@subscription.id}:#{@subscription.updated_at.to_i}"
 
     session = Stripe::Checkout::Session.create(session_attributes, idempotency_key: idempotency_key)
 

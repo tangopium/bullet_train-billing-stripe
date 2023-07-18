@@ -1,5 +1,5 @@
 Rails.application.routes.draw do
-  collection_actions = [:index, :new, :create]
+  collection_actions = [:index, :new, :create] # standard:disable Lint/UselessAssignment
 
   namespace :webhooks do
     namespace :incoming do
