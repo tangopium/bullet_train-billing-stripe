@@ -9,7 +9,7 @@ GIT
 PATH
   remote: .
   specs:
-    bullet_train-billing-stripe (1.0.1)
+    bullet_train-billing-stripe (1.0.2)
       bullet_train-billing
       rails (>= 6.0.0)
 
