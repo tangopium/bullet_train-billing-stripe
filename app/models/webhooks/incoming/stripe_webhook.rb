@@ -33,7 +33,16 @@ class Webhooks::Incoming::StripeWebhook < ApplicationRecord
           "canceled"
         end
 
-        topic.generic_subscription.update(status: status)
+        if topic.generic_subscription.status == "active" && status == "pending" && type == "customer.subscription.created"
+          # Sometimes we recieve a subscription.updated webhook _before_ we recieve
+          # the subscription.created webhook for the same subscription. In that case
+          # we want to make sure that we don't erroneously set the subscription status
+          # back to 'pending' becasue that's confusing for everyone especially customers.
+          # So here we just skip updating the status.
+          # TODO: Are there other things we should skip in this case?
+        else
+          topic.generic_subscription.update(status: status)
+        end
       end
 
       # Inspect the subscriptions items on this subscription and ensure they're in-sync with our local entries.
