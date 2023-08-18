@@ -40,6 +40,10 @@ class Webhooks::Incoming::StripeWebhook < ApplicationRecord
           # back to 'pending' becasue that's confusing for everyone especially customers.
           # So here we just skip updating the status.
           # TODO: Are there other things we should skip in this case?
+          # TODO: This is probably not the optimal solution. It might be better to split
+          # handling of subscription.created and subscriptino.updated into differ parts of the
+          # case statement, and then to query for an existing .updated record with an earlier
+          # timestamp before processing a .created webhook.
         else
           topic.generic_subscription.update(status: status)
         end
