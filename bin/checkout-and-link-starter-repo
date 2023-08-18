@@ -29,7 +29,3 @@ do
   mv Gemfile.tmp Gemfile
   echo "gem \"$package\", path: \"../..\"" >> Gemfile
 done
-
-echo "gem \"bullet_train-billing\", github: \"bullet-train-pro/bullet_train-billing\"" >> Gemfile
-
-bundle lock
