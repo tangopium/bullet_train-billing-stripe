@@ -55,7 +55,7 @@ bundle install
 
 # If we have a db/migrate directory but we do not have a .gemspec (because we're in the starter repo),
 # then we need to copy migrations from some gems into the local migrations
-if [ -d "./db/migrate" ] && [ ! -f "./bullet_train-billing-umbrella_subscriptions.gemspec" ]
+if [ -d "./db/migrate" ] && [ ! -f "./bullet_train-billing-stripe.gemspec" ]
 then
   cp `bundle show --paths | grep bullet_train-billing | sort | head -n 1`/db/migrate/* db/migrate
   echo "copied migrations from billing"
@@ -69,9 +69,9 @@ then
   cp /home/circleci/project/db/migrate/* db/migrate
 
   # And we also need to generate the system test
-  ./bin/rails g bullet_train:billing:umbrella_subscriptions:system_test
+  #./bin/rails g bullet_train:billing:umbrella_subscriptions:system_test
 
   # And use our own copies of a couple of files
   #cp ../../test/fixtures/files/roles.yml config/models/roles.yml
-  cp ../../test/fixtures/files/products.yml config/models/billing/products.yml
+  #cp ../../test/fixtures/files/products.yml config/models/billing/products.yml
 fi
