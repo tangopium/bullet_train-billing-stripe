@@ -30,6 +30,6 @@ do
   echo "gem \"$package\", path: \"../..\"" >> Gemfile
 done
 
-echo "gem \"bullet_train-billing\", github: \"bullet-train-pro/bullet_train-billing\"" >> Gemfile
+#echo "gem \"bullet_train-billing\", github: \"bullet-train-pro/bullet_train-billing\"" >> Gemfile
 
-bundle lock
+#bundle lock

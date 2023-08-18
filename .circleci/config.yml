@@ -104,6 +104,7 @@ jobs:
       - run: rm LICENSE.chromedriver
 
       - run: ../../bin/checkout-and-link-starter-repo
+      - run: ../../bin/checkout-and-link-dependencies
 
       - ruby/install-deps:
           clean-bundle: true
@@ -166,6 +167,7 @@ jobs:
       - run: rm LICENSE.chromedriver
 
       - run: ../../bin/checkout-and-link-starter-repo
+      - run: ../../bin/checkout-and-link-dependencies
 
       - ruby/install-deps:
           clean-bundle: true
