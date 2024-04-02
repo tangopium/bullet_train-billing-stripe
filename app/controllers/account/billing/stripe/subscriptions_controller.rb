@@ -9,12 +9,16 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
 
     session_attributes = {
       payment_method_types: ["card"],
-      subscription_data: {items: @subscription.stripe_items}.merge(trial_days ? {trial_period_days: trial_days} : {}),
+      subscription_data: {
+        items: @subscription.stripe_items,
+        trial_settings: {end_behavior: {missing_payment_method: 'cancel'}},
+      }.merge(trial_days ? {trial_period_days: trial_days} : {}),
       customer: @team.stripe_customer_id,
       client_reference_id: @subscription.id,
       success_url: CGI.unescape(url_for([:refresh, :account, @subscription, session_id: "{CHECKOUT_SESSION_ID}"])),
       cancel_url: url_for([:account, @subscription.generic_subscription]),
-      allow_promotion_codes: allow_promotion_codes
+      allow_promotion_codes: allow_promotion_codes,
+      payment_method_collection: 'if_required',
     }
 
     unless @team.stripe_customer_id
