@@ -2,13 +2,13 @@ class Billing::Stripe::Subscription < ApplicationRecord
   belongs_to :team
   has_one :generic_subscription, class_name: "Billing::Subscription", as: :provider_subscription
 
-  def stripe_items
-    generic_subscription.included_prices.map do |included_price|
-      {
-        plan: Billing::Stripe::PriceAdapter.new(included_price.price).stripe_price_id,
-        quantity: included_price.quantity
-      }
-    end
+  accepts_nested_attributes_for :generic_subscription
+
+  def stripe_item
+    {
+      plan: Billing::Stripe::PriceAdapter.new(generic_subscription.price).stripe_price_id,
+      quantity: generic_subscription.quantity || 1
+    }
   end
 
   def refresh_from_checkout_session(stripe_checkout_session)
@@ -23,21 +23,19 @@ class Billing::Stripe::Subscription < ApplicationRecord
   end
 
   def update_included_prices(subscription_items)
-    remaining_included_price_ids = []
+    subscription_item = subscription_items.first
 
-    subscription_items.each do |subscription_item|
-      stripe_price_id = subscription_item.dig("price", "id")
+    stripe_price_id = subscription_item.dig("price", "id")
 
-      # See if we're already including a matching price locally.
-      price = Billing::Stripe::PriceAdapter.find_by_stripe_price_id(stripe_price_id)
-      included_price = generic_subscription.included_prices.find_or_create_by(price_id: price.id) do |ip|
-        ip.quantity = subscription_item.dig("quantity")
-      end
+    # See if we're already including a matching price locally.
+    price = Billing::Stripe::PriceAdapter.find_by_stripe_price_id(stripe_price_id)
+    generic_subscription.update(
+      price: price,
+      quantity: subscription_item.dig("quantity")
+    )
+  end
 
-      remaining_included_price_ids << included_price.id
-    end
-
-    # Clean up any old prices that were on file but are no longer on the Stripe subscription.
-    generic_subscription.included_prices.where.not(id: remaining_included_price_ids).destroy_all
+  def provider_name
+    "stripe"
   end
 end

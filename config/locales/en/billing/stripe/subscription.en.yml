@@ -1,5 +1,7 @@
 en:
   billing/stripe/subscriptions: &subscriptions
+    upgrade_button:
+      select: "Upgrade"
     fields:
       stripe_subscription_id:
         _: &stripe_subscription_id Stripe Subscription ID

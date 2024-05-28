@@ -15,6 +15,7 @@ Rails.application.routes.draw do
             namespace :stripe do
               resources :subscriptions do
                 member do
+                  patch :upgrade
                   post :checkout
                   get :checkout
                   post :portal

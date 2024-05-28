@@ -1,16 +1,16 @@
 class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationController
-  account_load_and_authorize_resource :subscription, through: :team, through_association: :billing_stripe_subscriptions, member_actions: [:checkout, :refresh, :portal]
+  account_load_and_authorize_resource :subscription, through: :team, through_association: :billing_stripe_subscriptions, member_actions: [:upgrade, :checkout, :refresh, :portal]
 
   # GET/POST /account/billing/stripe/subscriptions/:id/checkout
   # GET/POST /account/billing/stripe/subscriptions/:id/checkout.json
   def checkout
-    trial_days = @subscription.generic_subscription.included_prices.map { |ip| ip.price.trial_days }.compact.max
-    allow_promotion_codes = @subscription.generic_subscription.included_prices.map { |ip| ip.price.allow_promotion_codes }.compact.any?
+    trial_days = @subscription.generic_subscription.price.trial_days
+    allow_promotion_codes = @subscription.generic_subscription.price.allow_promotion_codes.present?
 
     session_attributes = {
       payment_method_types: ["card"],
       subscription_data: {
-        items: @subscription.stripe_items,
+        items: [@subscription.stripe_item],
         trial_settings: {end_behavior: {missing_payment_method: 'cancel'}},
       }.merge(trial_days ? {trial_period_days: trial_days} : {}),
       customer: @team.stripe_customer_id,
@@ -27,11 +27,43 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
 
     # Stripe requires that Checkout Sessions having different attributes must
     # have different idempotency keys, so include the updated_at in the key.
-    idempotency_key = "#{t("application.name")}:subscription:#{@subscription.id}:#{@subscription.updated_at.to_i}"
+    idempotency_key = "#{t("application.name").parameterize.underscore }:subscription:#{@subscription.id}:#{@subscription.updated_at.to_i}"
 
     session = Stripe::Checkout::Session.create(session_attributes, idempotency_key: idempotency_key)
 
     redirect_to session.url, allow_other_host: true
+  end
+
+  def upgrade
+    @subscription.update(subscription_params)
+
+    session_attributes = {
+      id: @subscription.stripe_subscription_id,
+      subscription_data: {
+        items: [@subscription.stripe_item]
+      }
+    }
+
+    stripe_subscription = Stripe::Subscription.retrieve(
+      @subscription.stripe_subscription_id
+    )
+
+    Stripe::Subscription.update(
+      @subscription.stripe_subscription_id,
+      {
+        items: [
+          {
+            id: stripe_subscription.items.data[0].id,
+            price: @subscription.stripe_item[:plan]
+          }
+        ],
+        trial_end: 'now',
+        proration_behavior: 'create_prorations',
+        billing_cycle_anchor: 'now'
+      }
+    )
+
+    redirect_to account_billing_subscription_path(@subscription.generic_subscription)
   end
 
   # POST /account/billing/stripe/subscriptions/:id/portal
@@ -53,5 +85,9 @@ class Account::Billing::Stripe::SubscriptionsController < Account::ApplicationCo
     @subscription.refresh_from_checkout_session(checkout_session)
 
     redirect_to [:account, @subscription.generic_subscription.team], notice: t("billing/stripe/subscriptions.notifications.refreshed")
+  end
+
+  def subscription_params
+    params.require(:billing_stripe_subscription).permit(generic_subscription_attributes: [:id, :price_id, :product_id])
   end
 end
