@@ -27,8 +27,7 @@ namespace :billing do
           stripe_product = Stripe::Product.retrieve(id: stripe_product_id)
           puts "Verified `#{stripe_product.id}` exists as a product on Stripe.".yellow
 
-          stripe_product.name = name
-          stripe_product.save
+          Stripe::Product.update(stripe_product_id, name: name)
 
           puts "Updated name of `#{stripe_product.id}` to \"#{name}\".".green
         rescue Stripe::InvalidRequestError => _

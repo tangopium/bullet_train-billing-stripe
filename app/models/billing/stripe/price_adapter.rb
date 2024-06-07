@@ -13,8 +13,8 @@ class Billing::Stripe::PriceAdapter
 
   def matches_stripe_price?(stripe_price)
     @price.amount == stripe_price.unit_amount &&
-      @price.interval == stripe_price.recurring.interval &&
-      @price.duration == stripe_price.recurring.interval_count
+      @price.interval == stripe_price.recurring&.interval &&
+      @price.duration == stripe_price.recurring&.interval_count
   end
 
   def self.find_by_stripe_price_id(stripe_price_id)
